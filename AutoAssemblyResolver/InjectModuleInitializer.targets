@@ -1,0 +1,24 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Target Name="InjectModuleInitializer"
+          Inputs="$(TargetPath)"
+          Outputs="$(IntermediateOutputPath)$(MSBuildProjectName).moduleinitializer.tmp"
+          AfterTargets="AfterBuild">
+
+    <PropertyGroup>
+      <InjectExtraArgs Condition="'$(AssemblyOriginatorKeyFile)' != '' and '$(SignAssembly)' == 'true'">/k:"$(AssemblyOriginatorKeyFile)"</InjectExtraArgs>
+    </PropertyGroup>
+
+    <!-- Only when Framework is lower than net5 -->
+    <Exec Command='"$(InjectModuleInitializerTool)" ModuleInitializer Run "$(TargetPath)" $(InjectExtraArgs)' Condition="'$(DefineConstants)' != 'NET5_0_OR_GREATER'" />
+
+    <!-- Make sure the incremental build doesn't run this target again -->
+    <Touch Files="$(IntermediateOutputPath)$(MSBuildProjectName).moduleinitializer.tmp" AlwaysCreate="true" ForceTouch="true" />
+    <!-- Registers file for Clean -->
+    <ItemGroup>
+      <FileWrites Include="$(IntermediateOutputPath)$(MSBuildProjectName).moduleinitializer.tmp" />
+    </ItemGroup>
+
+  </Target>
+
+</Project>
