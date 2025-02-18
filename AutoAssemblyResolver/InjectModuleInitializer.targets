@@ -3,14 +3,15 @@
   <Target Name="InjectModuleInitializer"
           Inputs="$(TargetPath)"
           Outputs="$(IntermediateOutputPath)$(MSBuildProjectName).moduleinitializer.tmp"
-          AfterTargets="AfterBuild">
+          AfterTargets="AfterBuild"
+          Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' or $(TargetFrameworkVersion.Substring(1)) &lt; '5.0'">
 
     <PropertyGroup>
       <InjectExtraArgs Condition="'$(AssemblyOriginatorKeyFile)' != '' and '$(SignAssembly)' == 'true'">/k:"$(AssemblyOriginatorKeyFile)"</InjectExtraArgs>
     </PropertyGroup>
 
     <!-- Only when Framework is lower than net5 -->
-    <Exec Command='"$(InjectModuleInitializerTool)" ModuleInitializer Run "$(TargetPath)" $(InjectExtraArgs)' Condition="'$(DefineConstants)' != 'NET5_0_OR_GREATER'" />
+    <Exec Command='"$(InjectModuleInitializerTool)" ModuleInitializer Run "$(TargetPath)" $(InjectExtraArgs)' />
 
     <!-- Make sure the incremental build doesn't run this target again -->
     <Touch Files="$(IntermediateOutputPath)$(MSBuildProjectName).moduleinitializer.tmp" AlwaysCreate="true" ForceTouch="true" />
