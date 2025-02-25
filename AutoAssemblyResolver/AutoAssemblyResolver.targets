@@ -1,10 +1,11 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <Target Name="InjectModuleInitializer"
-          Inputs="$(TargetPath)"
-          Outputs="$(IntermediateOutputPath)$(MSBuildProjectName).moduleinitializer.tmp"
+  <Target Name="InjectModuleInitializerAfterBuild"
+          Returns="$(TargetPath)"
           AfterTargets="AfterBuild"
           Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' or $(TargetFrameworkVersion.Substring(1)) &lt; '5.0'">
+
+    <Error Condition="'$(InjectModuleInitializerTool)' == ''" Text="InjectModuleInitializerTool is not defined. Please add a reference to AutoAssemblyResolver.props" />
 
     <PropertyGroup>
       <InjectExtraArgs Condition="'$(AssemblyOriginatorKeyFile)' != '' and '$(SignAssembly)' == 'true'">/k:"$(AssemblyOriginatorKeyFile)"</InjectExtraArgs>
@@ -12,13 +13,6 @@
 
     <!-- Only when Framework is lower than net5 -->
     <Exec Command='"$(InjectModuleInitializerTool)" ModuleInitializer Run "$(TargetPath)" $(InjectExtraArgs)' />
-
-    <!-- Make sure the incremental build doesn't run this target again -->
-    <Touch Files="$(IntermediateOutputPath)$(MSBuildProjectName).moduleinitializer.tmp" AlwaysCreate="true" ForceTouch="true" />
-    <!-- Registers file for Clean -->
-    <ItemGroup>
-      <FileWrites Include="$(IntermediateOutputPath)$(MSBuildProjectName).moduleinitializer.tmp" />
-    </ItemGroup>
 
   </Target>
 

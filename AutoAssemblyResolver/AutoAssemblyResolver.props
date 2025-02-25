@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <InjectModuleInitializerTool>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)..\tools\Injector.exe'))</InjectModuleInitializerTool>
+    <PackDependsOn>$(PackDependsOn)InjectModuleInitializerAfterBuild;</PackDependsOn>
   </PropertyGroup>
 
 </Project>
